@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,7 +19,8 @@ import cat.itacademy.barcelonactiva.samayoa.sonia.s05.t02.n01.f1.domain.User;
 import cat.itacademy.barcelonactiva.samayoa.sonia.s05.t02.n01.f1.services.UserServiceImpl;
 
 @RestController
-@RequestMapping("players")
+@RequestMapping("/players")
+@CrossOrigin(origins = "http://localhost:8080")
 public class UserController {
 	
 	@Autowired
@@ -27,7 +29,7 @@ public class UserController {
 	@PostMapping("/add")
 	public ResponseEntity<User> addUser(@RequestBody User user) {
 
-		if (!userServiceImpl.findName(user.getUserName()))
+		if (!userServiceImpl.findByName(user.getUserName()))
 			return new ResponseEntity(new Message("Ya existe usuario con ese nombre"), HttpStatus.BAD_REQUEST);
 
 		User userData = userServiceImpl.addUser(new User(user.getUserName()));

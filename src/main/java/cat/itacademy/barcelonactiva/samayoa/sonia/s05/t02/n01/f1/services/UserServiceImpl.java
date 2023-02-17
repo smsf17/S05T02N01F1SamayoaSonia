@@ -80,7 +80,7 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public List<Game> getGamesOfAUser(int id) {
 		
-		return gameRepo.findAllById(id);
+		return gameRepo.findAllByIdGame(id);
 	}
 
 	@Override
@@ -101,8 +101,8 @@ public class UserServiceImpl implements UserService {
 		return userRepo.findFirst1ByOrderByAverageWinDesc();
 	}
 	
-	public boolean findName(String userName) {
-		return userRepo.findUserName(userName);
+	public boolean findByName(String userName) {
+		return userRepo.existsByUserName(userName);
 	}
 	
 
