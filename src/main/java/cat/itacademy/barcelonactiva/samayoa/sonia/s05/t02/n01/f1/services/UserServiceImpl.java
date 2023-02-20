@@ -1,17 +1,17 @@
 package cat.itacademy.barcelonactiva.samayoa.sonia.s05.t02.n01.f1.services;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
-import org.springframework.stereotype.Service;
 
 import cat.itacademy.barcelonactiva.samayoa.sonia.s05.t02.n01.f1.domain.Game;
 import cat.itacademy.barcelonactiva.samayoa.sonia.s05.t02.n01.f1.domain.User;
 import cat.itacademy.barcelonactiva.samayoa.sonia.s05.t02.n01.f1.repository.GameRepository;
 import cat.itacademy.barcelonactiva.samayoa.sonia.s05.t02.n01.f1.repository.UserRepository;
 
-@Service
+
 public class UserServiceImpl implements UserService {
 	
 	@Autowired
@@ -42,7 +42,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public Game addGame(int id, Game game) {
+	public Game addGame(Game game) {
 
 		int d1 = (int) (Math.floor(Math.random() * 6) + 1);
 		int d2 = (int) (Math.floor(Math.random() * 6) + 1);
@@ -55,6 +55,10 @@ public class UserServiceImpl implements UserService {
 		} else {
 			game.setWin(false);
 		}
+		Optional<User> userOptional = userRepo.findById(1);
+		if(userOptional.isPresent()) {
+		game.setUser(userOptional.get());
+		}
 
 		return gameRepo.save(game);
 	}
@@ -62,12 +66,18 @@ public class UserServiceImpl implements UserService {
 
 
 	@Override
-	public String deleteGame(int id) {
-		if (gameRepo.findById(id).isPresent()) {
-			gameRepo.deleteById(id);
-			return "partida con id: " + id + " eliminada!";
-		} else {
-			return "partida con id: " + id + " ni existe!";
+	public String deleteGame(int idUser) {
+		
+		List<Game> gameListUser = gameRepo.findAllByIdUser(idUser);
+		
+		if(gameListUser.isEmpty()) {
+			return "No existen partidas del usuario: " + idUser;
+		}else {
+			
+			for (int i = 1; i <= gameListUser.size(); i++) {
+				gameListUser.remove(i);				
+			}
+			return "partidas de usuario con id: " + idUser + " eliminadas!";
 		}
 	}
 
@@ -80,7 +90,7 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public List<Game> getGamesOfAUser(int id) {
 		
-		return gameRepo.findAllByIdGame(id);
+		return gameRepo.findAllByIdUser(id);
 	}
 
 	@Override
@@ -101,9 +111,11 @@ public class UserServiceImpl implements UserService {
 		return userRepo.findFirst1ByOrderByAverageWinDesc();
 	}
 	
+	@Override
 	public boolean findByName(String userName) {
 		return userRepo.existsByUserName(userName);
 	}
+
 	
 
 

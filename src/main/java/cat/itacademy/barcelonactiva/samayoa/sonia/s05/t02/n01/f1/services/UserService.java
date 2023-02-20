@@ -2,9 +2,12 @@ package cat.itacademy.barcelonactiva.samayoa.sonia.s05.t02.n01.f1.services;
 
 import java.util.List;
 
+import org.springframework.stereotype.Service;
+
 import cat.itacademy.barcelonactiva.samayoa.sonia.s05.t02.n01.f1.domain.Game;
 import cat.itacademy.barcelonactiva.samayoa.sonia.s05.t02.n01.f1.domain.User;
 
+@Service
 public interface UserService {
 	
 	// POST: /players: crea un jugador/a.
@@ -15,10 +18,10 @@ public interface UserService {
 
 	// POST /players/{id}/games/ : un jugador/a específic realitza una tirada dels
 	// daus.
-	Game addGame(int id, Game game);
+	Game addGame(Game game);
 
 	// DELETE /players/{id}/games: elimina les tirades del jugador/a.
-	String deleteGame(int id);
+	String deleteGame(int idUser);
 
 	// GET /players/: retorna el llistat de tots els jugadors/es del sistema amb el
 	// seu percentatge mitjà d’èxits.
@@ -38,5 +41,7 @@ public interface UserService {
 	// GET /players/ranking/winner: retorna el jugador amb pitjor percentatge
 	// d’èxit.
 	List<User> getUsersHighScore();
+	
+	public boolean findByName(String userName);
 
 }

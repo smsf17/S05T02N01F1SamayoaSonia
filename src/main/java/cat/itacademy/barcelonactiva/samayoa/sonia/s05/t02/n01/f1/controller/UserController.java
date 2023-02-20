@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import cat.itacademy.barcelonactiva.samayoa.sonia.s05.t02.n01.f1.domain.Game;
 import cat.itacademy.barcelonactiva.samayoa.sonia.s05.t02.n01.f1.domain.User;
-import cat.itacademy.barcelonactiva.samayoa.sonia.s05.t02.n01.f1.services.UserServiceImpl;
+import cat.itacademy.barcelonactiva.samayoa.sonia.s05.t02.n01.f1.services.UserService;
 
 @RestController
 @RequestMapping("/players")
@@ -24,15 +24,15 @@ import cat.itacademy.barcelonactiva.samayoa.sonia.s05.t02.n01.f1.services.UserSe
 public class UserController {
 	
 	@Autowired
-	UserServiceImpl userServiceImpl;
+	UserService userService;
 
 	@PostMapping("/add")
 	public ResponseEntity<User> addUser(@RequestBody User user) {
 
-		if (!userServiceImpl.findByName(user.getUserName()))
+		if (!userService.findByName(user.getUserName()))
 			return new ResponseEntity(new Message("Ya existe usuario con ese nombre"), HttpStatus.BAD_REQUEST);
 
-		User userData = userServiceImpl.addUser(new User(user.getUserName()));
+		User userData = userService.addUser(new User(user.getUserName()));
 		return new ResponseEntity(new Message("Usuario creada"), HttpStatus.OK);
 
 	}
@@ -40,13 +40,13 @@ public class UserController {
 	@PutMapping("/update")
 	public String updateUser(@RequestBody User userUpdate) {
 
-		return userServiceImpl.updateUser(userUpdate);
+		return userService.updateUser(userUpdate);
 
 	}
 
 	@PostMapping("/addgame/{idUser}")
 	public ResponseEntity<Game> addGame(@PathVariable("idUser") Integer idUser, @RequestBody Game game) {
-		userServiceImpl.addGame(idUser, game);
+		userService.addGame(game);
 		return ResponseEntity(new Message("Partida creada correctamente"), HttpStatus.OK);
 
 	}
@@ -54,7 +54,7 @@ public class UserController {
 	@GetMapping("/getAllUsers")
 	public ResponseEntity<List<User>> getAllUsers() {
 		try {
-			List<User> userList = userServiceImpl.getUsersAndSuccess();
+			List<User> userList = userService.getUsersAndSuccess();
 
 			if (userList.isEmpty()) {
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -71,7 +71,7 @@ public class UserController {
 	@GetMapping("/{id}/games")
 	public ResponseEntity<List<Game>> getGamesOfAUser(int id) {
 		try {
-			List<Game> gameList = userServiceImpl.getGamesOfAUser(id);
+			List<Game> gameList = userService.getGamesOfAUser(id);
 
 			if (gameList.isEmpty()) {
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -88,7 +88,7 @@ public class UserController {
 	@GetMapping("/ranking")
 	public ResponseEntity<List<User>> getUsersByScoreOrder() {
 		try {
-			List<User> userList = userServiceImpl.getUsersByScoreOrder();
+			List<User> userList = userService.getUsersByScoreOrder();
 
 			if (userList.isEmpty()) {
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -105,7 +105,7 @@ public class UserController {
 	@GetMapping("/ranking/loser")
 	public ResponseEntity<List<User>> getUserLowScore() {
 		try {
-			List<User> findFirstByOrderByAverageWinAsc = userServiceImpl.getUserLowScore();
+			List<User> findFirstByOrderByAverageWinAsc = userService.getUserLowScore();
 			if (findFirstByOrderByAverageWinAsc.isEmpty()) {
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			}
@@ -119,7 +119,7 @@ public class UserController {
 	@GetMapping("/ranking/winner")
 	public ResponseEntity<List<User>> getUsersHighScore() {
 		try {
-			List<User> findFirstByOrderByAverageWinDesc = userServiceImpl.getUsersHighScore();
+			List<User> findFirstByOrderByAverageWinDesc = userService.getUsersHighScore();
 			if (findFirstByOrderByAverageWinDesc.isEmpty()) {
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			}

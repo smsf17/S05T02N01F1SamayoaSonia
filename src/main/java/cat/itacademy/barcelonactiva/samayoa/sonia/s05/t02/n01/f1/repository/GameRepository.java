@@ -11,5 +11,6 @@ import cat.itacademy.barcelonactiva.samayoa.sonia.s05.t02.n01.f1.domain.Game;
 public interface GameRepository extends JpaRepository<Game, Integer> {
 
 	List<Game> findAllByIdGame(int idGame);
+	List<Game> findAllByIdUser(int idUser);
 
 }
