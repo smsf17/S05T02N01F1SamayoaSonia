@@ -16,7 +16,7 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "user")
-public class User {
+public class UserDTO {
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,9 +30,6 @@ public class User {
 
 	@Column(name = "AverageWin")
 	private float averageWin;
-
-	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-	private List<Game> gameList;
 
 	public Integer getId() {
 		return id;
@@ -71,21 +68,31 @@ public class User {
 		this.averageWin = averageWin;
 	}
 
-	public List<Game> getGameList() {
-		return gameList;
-	}
 
-	public void setGameList(List<Game> gameList) {
-		this.gameList = gameList;
-	}
-
-	public User(String userName) {
+	public UserDTO(String userName) {
 		this.userName = userName;
 	}
 
-	public User() {
+	public UserDTO() {
 		// TODO Auto-generated constructor stub
 	}
+	
+
+	public UserDTO(User user, float averageWin) {
+		this.id = user.getId();
+		this.userName = user.getUserName();
+		this.regDate = user.getRegDate();
+		this.averageWin = user.getAverageWin();
+	}
+
+
+
+	@Override
+	public String toString() {
+		return "UserDTO [id=" + id + ", userName=" + userName + ", regDate=" + regDate + ", averageWin=" + averageWin
+				+ "]";
+	}
+	
 
 
 }

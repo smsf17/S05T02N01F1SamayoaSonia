@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 
 import cat.itacademy.barcelonactiva.samayoa.sonia.s05.t02.n01.f1.domain.Game;
 import cat.itacademy.barcelonactiva.samayoa.sonia.s05.t02.n01.f1.domain.User;
+import cat.itacademy.barcelonactiva.samayoa.sonia.s05.t02.n01.f1.domain.UserDTO;
 
 @Service
 public interface UserService {
@@ -18,29 +19,29 @@ public interface UserService {
 
 	// POST /players/{id}/games/ : un jugador/a específic realitza una tirada dels
 	// daus.
-	Game addGame(Game game);
+	Game addGameRoll(User user);
 
 	// DELETE /players/{id}/games: elimina les tirades del jugador/a.
-	String deleteGame(int idUser);
+	String deleteGame(User user);
 
 	// GET /players/: retorna el llistat de tots els jugadors/es del sistema amb el
 	// seu percentatge mitjà d’èxits.
-	List<User> getUsersAndSuccess();
+	List<UserDTO> getUsersAndSuccess();
 
 	// GET /players/{id}/games: retorna el llistat de jugades per un jugador/a.
-	List<Game> getGamesOfAUser(int id);
+	List<Game> getGamesOfAUser(User user);
 
 	// GET /players/ranking: retorna el ranking mig de tots els jugadors/es del
 	// sistema. És a dir, el percentatge mitjà d’èxits.
-	List<User> getUsersByScoreOrder();
+	List<UserDTO> getUsersByScoreOrder();
 
 	// GET /players/ranking/loser: retorna el jugador/a amb pitjor percentatge
 	// d’èxit.
-	List<User> getUserLowScore();
+	UserDTO getUserLowScore();
 
 	// GET /players/ranking/winner: retorna el jugador amb pitjor percentatge
 	// d’èxit.
-	List<User> getUsersHighScore();
+	UserDTO getUsersHighScore();
 	
 	public boolean findByName(String userName);
 

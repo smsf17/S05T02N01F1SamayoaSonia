@@ -1,13 +1,15 @@
 package cat.itacademy.barcelonactiva.samayoa.sonia.s05.t02.n01.f1.services;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort;
 
 import cat.itacademy.barcelonactiva.samayoa.sonia.s05.t02.n01.f1.domain.Game;
 import cat.itacademy.barcelonactiva.samayoa.sonia.s05.t02.n01.f1.domain.User;
+import cat.itacademy.barcelonactiva.samayoa.sonia.s05.t02.n01.f1.domain.UserDTO;
 import cat.itacademy.barcelonactiva.samayoa.sonia.s05.t02.n01.f1.repository.GameRepository;
 import cat.itacademy.barcelonactiva.samayoa.sonia.s05.t02.n01.f1.repository.UserRepository;
 
@@ -18,9 +20,18 @@ public class UserServiceImpl implements UserService {
 	UserRepository userRepo;
 	@Autowired
 	GameRepository gameRepo;
+	
+	public UserServiceImpl(UserRepository userRepo, GameRepository gameRepo) {
+		this.userRepo = userRepo;
+		this.gameRepo = gameRepo;
+	}
 
 	@Override
-	public User addUser(User user) {
+	public User addUser(User userInput) {
+		
+		User user = new User();
+		user.setUserName(userInput.getUserName());
+		user.setRegDate(LocalDate.now());
 		
 		return userRepo.save(user);
 	}
@@ -32,17 +43,20 @@ public class UserServiceImpl implements UserService {
 		
 		if(userRepo.findById(num).isPresent()) {
 			User us = new User();
-			us=userRepo.findById(num).get();
+			us.setId(num);
 			us.setUserName(userUpdate.getUserName());
+			us.setRegDate(LocalDate.now());
 			userRepo.save(us);
 			return "Jugador modificado!";
 		}else { 
-		return "Jugador con Id:  no encontrado!";
+		return "Jugador con id " + num + " no encontrado!";
 		}
 	}
 
 	@Override
-	public Game addGame(Game game) {
+	public Game addGameRoll(User user) {
+		
+		Game game = new Game();
 
 		int d1 = (int) (Math.floor(Math.random() * 6) + 1);
 		int d2 = (int) (Math.floor(Math.random() * 6) + 1);
@@ -55,10 +69,7 @@ public class UserServiceImpl implements UserService {
 		} else {
 			game.setWin(false);
 		}
-		Optional<User> userOptional = userRepo.findById(1);
-		if(userOptional.isPresent()) {
-		game.setUser(userOptional.get());
-		}
+		game.setUser(user);
 
 		return gameRepo.save(game);
 	}
@@ -66,49 +77,77 @@ public class UserServiceImpl implements UserService {
 
 
 	@Override
-	public String deleteGame(int idUser) {
+	public String deleteGame(User user) {
 		
-		List<Game> gameListUser = gameRepo.findAllByIdUser(idUser);
+		int num = (int) user.getId();
 		
-		if(gameListUser.isEmpty()) {
-			return "No existen partidas del usuario: " + idUser;
-		}else {
+		if(userRepo.findById(num).isPresent()) {
+			gameRepo.deleteByUser(user);
+			return "partidas de usuario con id: " + num + " eliminadas!";
 			
-			for (int i = 1; i <= gameListUser.size(); i++) {
-				gameListUser.remove(i);				
-			}
-			return "partidas de usuario con id: " + idUser + " eliminadas!";
 		}
-	}
-
-	@Override
-	public List<User> getUsersAndSuccess() {
 		
-		return userRepo.findAll();
+		return "Usuario " + num + " no encontrado";
+	
 	}
 
 	@Override
-	public List<Game> getGamesOfAUser(int id) {
+	public List<UserDTO> getUsersAndSuccess() {
 		
-		return gameRepo.findAllByIdUser(id);
-	}
-
-	@Override
-	public List<User> getUsersByScoreOrder() {
+		List<User> users = userRepo.findAll();
+		List<UserDTO> usersDTO = new ArrayList<UserDTO>();
 		
-		return userRepo.findAll(Sort.by("averageWin"));
-	}
-
-	@Override
-	public List<User> getUserLowScore() {
+		users.forEach(x->{
+			float average = calculateAverageWin(x);
+			UserDTO userDTO = new UserDTO(x, average);
+			usersDTO.add(userDTO);
+		});
 		
-		return userRepo.findFirst1ByOrderByAverageWinAsc();
+		return usersDTO;
 	}
 
 	@Override
-	public List<User> getUsersHighScore() {
-		// TODO Auto-generated method stub
-		return userRepo.findFirst1ByOrderByAverageWinDesc();
+	public List<Game> getGamesOfAUser(User user) {
+		
+		int num = (int) user.getId();
+		
+		if(userRepo.findById(num).isPresent()) {
+		
+		return gameRepo.findByUser(user);
+		}
+		ArrayList<Game> gameList = new ArrayList<>();
+		return gameList;
+	}
+
+	@Override
+	public List<UserDTO> getUsersByScoreOrder() {
+				
+		List<User> users = userRepo.findAll();
+		List<UserDTO> usersDTO = new ArrayList<UserDTO>();
+		
+		users.forEach(x->{
+			float average = calculateAverageWin(x);
+			UserDTO userDTO = new UserDTO(x, average);
+			usersDTO.add(userDTO);
+		});
+		
+		return usersDTO;
+	}
+
+	@Override
+	public UserDTO getUserLowScore() {
+		
+		List<UserDTO> usersList = getUsersAndSuccess();
+				
+		return usersList.stream().min(Comparator.comparing(UserDTO::getAverageWin)).get();
+	}
+
+	@Override
+	public UserDTO getUsersHighScore() {
+		
+		List<UserDTO> usersList = getUsersAndSuccess();
+		
+		return usersList.stream().max(Comparator.comparing(UserDTO::getAverageWin)).get();
 	}
 	
 	@Override
@@ -116,7 +155,23 @@ public class UserServiceImpl implements UserService {
 		return userRepo.existsByUserName(userName);
 	}
 
-	
+	public float calculateAverageWin (User user) {
+
+		List<Game> gameList = gameRepo.findByUser(user);
+		
+		
+		int numRollWin = 0;
+		int numRolls = gameList.size();
+
+		for(Game g:gameList) {
+			if (g.getWin() == true) {
+				numRollWin++;				
+			}
+		}
+		return numRollWin/numRolls*100;
+		
+	}
+
 
 
 }
